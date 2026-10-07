@@ -8,8 +8,16 @@
   "use strict";
 
   // ---------- Telegram WebApp (опционально) ----------
-  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  if (tg) {
+  // Скрипт telegram.org подключён с async — он может загрузиться ПОСЛЕ game.js
+  // (или не загрузиться, если сеть его блокирует). Поэтому берём WebApp лениво.
+  const getTg = () =>
+    window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+
+  let tgReady = false;
+  function initTelegram() {
+    const tg = getTg();
+    if (!tg || tgReady) return;
+    tgReady = true;
     try {
       tg.ready();
       tg.expand();
@@ -19,6 +27,7 @@
   }
 
   const haptic = (type) => {
+    const tg = getTg();
     if (!tg || !tg.HapticFeedback) return;
     try {
       if (type === "impact") tg.HapticFeedback.impactOccurred("light");
@@ -480,6 +489,13 @@
   });
 
   // ---------- Запуск ----------
+  initTelegram();
+  // Telegram-скрипт грузится async — если он пришёл позже, дождёмся события load
+  window.addEventListener("load", initTelegram);
+  // и подстрахуемся парой коротких проверок (на случай кэша/быстрой загрузки)
+  setTimeout(initTelegram, 0);
+  setTimeout(initTelegram, 500);
+
   resize();
   resetGame();
   showOverlay("🐍", "Змейка", "Свайпните по экрану, чтобы начать", "Ешьте еду, расти, не врезайтесь!");

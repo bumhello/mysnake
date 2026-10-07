@@ -41,7 +41,9 @@
     </footer>
   </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Неблокирующая загрузка: если telegram.org недоступен,
+       игра всё равно стартует сразу -->
+  <script async src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
